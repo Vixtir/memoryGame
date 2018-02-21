@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "react"
+  ],
+ "extends": [
+    "airbnb-base",
+    "plugin:react/recommended"
+  ],
+ "rules":{
+    "linebreak-style": 0
+  }
+}
