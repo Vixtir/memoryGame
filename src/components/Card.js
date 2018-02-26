@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Card = ({ card, onCardClick, flip }) => {
-  const cN = flip ? 'card flip' : 'card';
+  const cN = `card ${flip ? 'flip' : ''}`;
   return (
     <div
       className={cN}

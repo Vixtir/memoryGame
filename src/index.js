@@ -7,7 +7,7 @@ import cardBoardState from './reducers/CardBoard';
 import css from './styles/index.styl';
 
 const appState = combineReducers({
-  cards: cardBoardState,
+  gameDeck: cardBoardState,
 });
 
 render(

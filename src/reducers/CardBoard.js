@@ -24,24 +24,71 @@ const createGameDeck = (cardDeck) => {
 
 const initialState = () => {
   const deck = createCardDeck(CARD_SUITS, CARD_VALUES); // 52 cards
-  const gameDeck = createGameDeck(deck); // 18 card (9 pairs)
-  return gameDeck.map((card, idx) =>
+  const gameDeck = createGameDeck(deck).map((card, idx) =>
     cardState(undefined, {
       type: 'ADD_CARD',
       idx,
       cardType: card,
     }));
+
+  return {
+    cards: gameDeck,
+    activeCard: '',
+    compareCards: [],
+    needCompare: false,
+  };
 };
 
 const cardsBoardState = (state = initialState(), action) => {
   switch (action.type) {
     case 'ADD_CARD':
-      return [
-        ...state,
-        cardState(undefined, action),
-      ];
+      return Object.assign({}, state, {
+        cards: [
+          ...state,
+          cardState(undefined, action),
+        ],
+      });
+    case 'FLIP_ALL_CARDS': {
+      return Object.assign({}, state, {
+        cards: state.cards.map((card, idx) => cardState(card, { type: 'FLIP_CARD', idxs: [idx] })),
+      });
+    }
     case 'FLIP_CARD': {
-      return state.map(card => cardState(card, action));
+      return Object.assign({}, state, {
+        cards: state.cards.map((card) => cardState(card, { type: 'FLIP_CARD', idxs: action.idxs })),
+      });
+    }
+    case 'COMPARE_CARDS': {
+      const [firstCard, secondCard] = state.compareCards;
+      if (firstCard.cardType === secondCard.cardType) {
+        // подсчет очков, проверка окончания игры
+        return Object.assign({}, state, { needCompare: false, compareCards: [] });
+      } else {
+        return Object.assign(
+          {}, 
+          state, 
+          { 
+            cards: state.cards.map(card =>
+              cardState(card, { type: 'FLIP_CARD', idxs: [firstCard.idx, secondCard.idx]})),
+            compareCards: [],
+            needCompare: false
+          }
+        )
+      }
+    }
+    case 'CHOOSE_CARD': {
+      const flippedCards = state.cards.map(card => cardState(card, { type: 'FLIP_CARD', idxs: [action.card.idx] }));
+      const compareCards = state.compareCards.splice('');
+
+      return Object.assign(
+        {},
+        state,
+        {
+          cards: flippedCards,
+          compareCards: [...compareCards, action.card],
+          needCompare: compareCards.length === 1,
+        },
+      );
     }
     default:
       return state;

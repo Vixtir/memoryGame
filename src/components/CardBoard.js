@@ -4,16 +4,25 @@ import Card from './Card';
 
 class CardBoard extends React.Component {
   componentDidMount() {
-    const { cards } = this.props;
+    setTimeout(this.props.flipAllCards, 5000);
+  }
+
+  componentDidUpdate() {
+    const {
+      needCompare,
+      compareCards
+    } = this.props;
     setTimeout(() => {
-      cards.forEach((element) => {
-        this.props.flipCard(element.idx);
-      });
-    }, 5000);
+      if (needCompare) compareCards();
+    }, 600);
   }
 
   render() {
-    const { cards, flipCard } = this.props;
+    const {
+      cards,
+      chooseCard,
+      needCompare
+    } = this.props;
 
     return (<div className='card-board'>
       { cards.map(card =>
@@ -21,7 +30,12 @@ class CardBoard extends React.Component {
             key={card.idx}
             card={card.cardType}
             flip={card.flip}
-            onCardClick={() => flipCard(card.idx)}
+            onCardClick={() => {
+                if (card.flip && !needCompare) {
+                  chooseCard(card);
+                }
+              }
+            }
           />)
       }
     </div>);
@@ -30,12 +44,16 @@ class CardBoard extends React.Component {
 
 const mapStateToProps = state =>
   ({
-    cards: state.cards,
+    cards: state.gameDeck.cards,
+    compareCardList: state.gameDeck.compareCards,
+    needCompare: state.gameDeck.needCompare,
   });
 
 const mapDispatchToProps = dispatch =>
   ({
-    flipCard: idx => dispatch({ type: 'FLIP_CARD', idx }),
+    flipAllCards: () => dispatch({ type: 'FLIP_ALL_CARDS' }),
+    chooseCard: card => dispatch({ type: 'CHOOSE_CARD', card }),
+    compareCards: () => dispatch({ type: 'COMPARE_CARDS' }),
   });
 
 export default connect(mapStateToProps, mapDispatchToProps)(CardBoard);

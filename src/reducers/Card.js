@@ -7,12 +7,11 @@ const cardState = (state = {}, action) => {
         flip: false,
       };
     case 'FLIP_CARD': {
-      if (state.idx === action.idx) {
+      if (action.idxs.indexOf(state.idx) !== -1) {
         return Object.assign({}, state, { flip: !state.flip });
       } else {
         return state;
       }
-      break;
     }
     default:
       return state;

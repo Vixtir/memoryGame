@@ -1965,7 +1965,7 @@ var _index2 = _interopRequireDefault(_index);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var appState = (0, _redux.combineReducers)({
-  cards: _CardBoard2.default
+  gameDeck: _CardBoard2.default
 });
 
 (0, _reactDom.render)(_react2.default.createElement(
@@ -21254,22 +21254,26 @@ var CardBoard = function (_React$Component) {
   _createClass(CardBoard, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this2 = this;
-
-      var cards = this.props.cards;
+      setTimeout(this.props.flipAllCards, 5000);
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      var _props = this.props,
+          needCompare = _props.needCompare,
+          compareCards = _props.compareCards;
 
       setTimeout(function () {
-        cards.forEach(function (element) {
-          _this2.props.flipCard(element.idx);
-        });
-      }, 5000);
+        if (needCompare) compareCards();
+      }, 600);
     }
   }, {
     key: 'render',
     value: function render() {
-      var _props = this.props,
-          cards = _props.cards,
-          flipCard = _props.flipCard;
+      var _props2 = this.props,
+          cards = _props2.cards,
+          chooseCard = _props2.chooseCard,
+          needCompare = _props2.needCompare;
 
 
       return _react2.default.createElement(
@@ -21281,7 +21285,9 @@ var CardBoard = function (_React$Component) {
             card: card.cardType,
             flip: card.flip,
             onCardClick: function onCardClick() {
-              return flipCard(card.idx);
+              if (card.flip && !needCompare) {
+                chooseCard(card);
+              }
             }
           });
         })
@@ -21294,14 +21300,22 @@ var CardBoard = function (_React$Component) {
 
 var mapStateToProps = function mapStateToProps(state) {
   return {
-    cards: state.cards
+    cards: state.gameDeck.cards,
+    compareCardList: state.gameDeck.compareCards,
+    needCompare: state.gameDeck.needCompare
   };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
-    flipCard: function flipCard(idx) {
-      return dispatch({ type: 'FLIP_CARD', idx: idx });
+    flipAllCards: function flipAllCards() {
+      return dispatch({ type: 'FLIP_ALL_CARDS' });
+    },
+    chooseCard: function chooseCard(card) {
+      return dispatch({ type: 'CHOOSE_CARD', card: card });
+    },
+    compareCards: function compareCards() {
+      return dispatch({ type: 'COMPARE_CARDS' });
     }
   };
 };
@@ -21330,7 +21344,7 @@ var Card = function Card(_ref) {
       onCardClick = _ref.onCardClick,
       flip = _ref.flip;
 
-  var cN = flip ? 'card flip' : 'card';
+  var cN = 'card ' + (flip ? 'flip' : '');
   return _react2.default.createElement(
     'div',
     {
@@ -21367,6 +21381,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _Card = __webpack_require__(72);
 
 var _Card2 = _interopRequireDefault(_Card);
@@ -21401,14 +21417,20 @@ var createGameDeck = function createGameDeck(cardDeck) {
 
 var initialState = function initialState() {
   var deck = createCardDeck(CARD_SUITS, CARD_VALUES); // 52 cards
-  var gameDeck = createGameDeck(deck); // 18 card (9 pairs)
-  return gameDeck.map(function (card, idx) {
+  var gameDeck = createGameDeck(deck).map(function (card, idx) {
     return (0, _Card2.default)(undefined, {
       type: 'ADD_CARD',
       idx: idx,
       cardType: card
     });
   });
+
+  return {
+    cards: gameDeck,
+    activeCard: '',
+    compareCards: [],
+    needCompare: false
+  };
 };
 
 var cardsBoardState = function cardsBoardState() {
@@ -21417,11 +21439,55 @@ var cardsBoardState = function cardsBoardState() {
 
   switch (action.type) {
     case 'ADD_CARD':
-      return [].concat(_toConsumableArray(state), [(0, _Card2.default)(undefined, action)]);
+      return Object.assign({}, state, {
+        cards: [].concat(_toConsumableArray(state), [(0, _Card2.default)(undefined, action)])
+      });
+    case 'FLIP_ALL_CARDS':
+      {
+        return Object.assign({}, state, {
+          cards: state.cards.map(function (card, idx) {
+            return (0, _Card2.default)(card, { type: 'FLIP_CARD', idxs: [idx] });
+          })
+        });
+      }
     case 'FLIP_CARD':
       {
-        return state.map(function (card) {
-          return (0, _Card2.default)(card, action);
+        return Object.assign({}, state, {
+          cards: state.cards.map(function (card) {
+            return (0, _Card2.default)(card, { type: 'FLIP_CARD', idxs: action.idxs });
+          })
+        });
+      }
+    case 'COMPARE_CARDS':
+      {
+        var _state$compareCards = _slicedToArray(state.compareCards, 2),
+            firstCard = _state$compareCards[0],
+            secondCard = _state$compareCards[1];
+
+        if (firstCard.cardType === secondCard.cardType) {
+          // подсчет очков, проверка окончания игры
+          return Object.assign({}, state, { needCompare: false, compareCards: [] });
+        } else {
+          return Object.assign({}, state, {
+            cards: state.cards.map(function (card) {
+              return (0, _Card2.default)(card, { type: 'FLIP_CARD', idxs: [firstCard.idx, secondCard.idx] });
+            }),
+            compareCards: [],
+            needCompare: false
+          });
+        }
+      }
+    case 'CHOOSE_CARD':
+      {
+        var flippedCards = state.cards.map(function (card) {
+          return (0, _Card2.default)(card, { type: 'FLIP_CARD', idxs: [action.card.idx] });
+        });
+        var compareCards = state.compareCards.splice('');
+
+        return Object.assign({}, state, {
+          cards: flippedCards,
+          compareCards: [].concat(_toConsumableArray(compareCards), [action.card]),
+          needCompare: compareCards.length === 1
         });
       }
     default:
@@ -21454,12 +21520,11 @@ var cardState = function cardState() {
       };
     case 'FLIP_CARD':
       {
-        if (state.idx === action.idx) {
+        if (action.idxs.indexOf(state.idx) !== -1) {
           return Object.assign({}, state, { flip: !state.flip });
         } else {
           return state;
         }
-        break;
       }
     default:
       return state;
