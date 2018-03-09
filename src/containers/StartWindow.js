@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Button from '../components/Button';
-import { changeStage } from '../actions';
+import { startGame } from '../actions';
 
 const StartWindow = ({
-  changeStage
+  startGame
 }) => (
   <div className='start-window'>
     <img src='/images/StartGame.png'/>
@@ -14,8 +14,8 @@ const StartWindow = ({
     <Button
       className='button start-window_button'
       text="Начать игру"
-      onButtonClick={() => changeStage('game')}/>
+      onButtonClick={startGame}/>
   </div>
 );
 
-export default connect(null, { changeStage })(StartWindow);
+export default connect(null, { startGame })(StartWindow);

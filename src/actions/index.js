@@ -3,15 +3,15 @@ export const flipAllCards = () => ({
 });
 
 export const chooseCard = card => ({
-  type: 'CHOOSE_CARD',
+  type: 'FLIP_CARD',
   card,
 });
 
-export const compareCards = () => ({
+export const compareCards = pair => ({
   type: 'COMPARE_CARDS',
+  pair,
 });
 
-export const changeStage = stage => ({
-  type: 'CHANGE_STAGE',
-  stage,
+export const startGame = () => ({
+  type: 'START_GAME',
 });

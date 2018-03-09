@@ -1,6 +1,5 @@
 import React from 'react';
 
-
 const Button = ({
   onButtonClick,
   text,
@@ -15,6 +14,5 @@ const Button = ({
     { text }
   </button>
 );
-
 
 export default Button;

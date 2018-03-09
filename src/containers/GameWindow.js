@@ -7,7 +7,7 @@ import {
   flipAllCards,
   chooseCard,
   compareCards,
-  changeStage,
+  startGame,
 } from '../actions';
 
 const FLIP_DELAY = 5000;
@@ -24,10 +24,11 @@ class GameWindow extends Component {
   componentDidUpdate() {
     const {
       needCompare,
+      pair,
       compareCards
     } = this.props;
     setTimeout(() => {
-      if (needCompare) compareCards();
+      needCompare && compareCards(pair);
     }, 600);
   }
 
@@ -36,7 +37,7 @@ class GameWindow extends Component {
       clearTimeout(this.timerID);
     }
 
-    this.props.changeStage('game');
+    this.props.startGame();
     this.timerID = setTimeout(this.props.flipAllCards, FLIP_DELAY);
   }
 
@@ -61,18 +62,18 @@ class GameWindow extends Component {
 
 const mapStateToProps = state =>
   ({
-    cards: state.AppState.cards,
-    compareCardList: state.AppState.compareCardsPair,
-    needCompare: state.AppState.needCompare,
-    gameStage: state.AppState.gameStage,
-    score: state.AppState.gameScore,
+    p: state,
+    cards: state.cardBoard.cardList,
+    pair: state.cardBoard.comparePair.pair,
+    needCompare: state.cardBoard.comparePair.needCompare,
+    score: state.gameInfo.score,
   });
 
 const actions = {
   flipAllCards,
   chooseCard,
   compareCards,
-  changeStage,
+  startGame,
 };
 
 export default connect(mapStateToProps, actions)(GameWindow);

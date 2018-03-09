@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Button from '../components/Button';
-import { changeStage } from '../actions';
+import { startGame } from '../actions';
 
 const EndWindow = ({
   score,
-  changeStage
+  startGame
 }) => (
   <div className='end-window'>
     <img src='/images/EndGame.png'/>
@@ -16,12 +16,12 @@ const EndWindow = ({
     <Button
       className='button end-window_button'
       text='Еще раз'
-      onButtonClick={() => changeStage('game')}/>
+      onButtonClick={() => startGame('game')}/>
   </div>
 );
 
 const mapStateToProps = state => ({
-  score: state.AppState.gameScore,
+  score: state.gameInfo.score,
 });
 
-export default connect(mapStateToProps, { changeStage })(EndWindow);
+export default connect(mapStateToProps, { startGame })(EndWindow);

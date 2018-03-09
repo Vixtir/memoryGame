@@ -1,51 +1,64 @@
-import cardState from '../reducers/Card';
-import { getNineRandomNumbers, shuffleArray } from '../utils/utils';
+import { combineReducers } from 'redux';
+import cardState from '../reducers/card';
+import * as fromHelpers from '../helpers';
 
-const CARD_SUITS = ['D', 'H', 'S', 'C'];
-const CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 0, 'J', 'Q', 'K', 'A'];
-
-const createCardDeck = (cardSuits, cardValues) =>
-  cardSuits.reduce(
-    (deck, suit) =>
-      [
-        ...deck,
-        ...cardValues.map(cardValue => `${cardValue}${suit}`)]
-    , [],
-  );
-
-const createGameDeck = (cardDeck) => {
-  const nineUniqueIndexes = getNineRandomNumbers(cardDeck.length);
-  const cards = nineUniqueIndexes.map(idx => cardDeck[idx]);
-
-  return shuffleArray([...cards, ...cards]);
-};
-
-const initialState = () => {
-  const deck = createCardDeck(CARD_SUITS, CARD_VALUES); // 52 cards
-  const gameDeck = createGameDeck(deck).map((card, idx) =>
+const getGameCards = () => {
+  const gameDeck = fromHelpers.createGameDeck().map((card, idx) =>
     cardState(undefined, {
       type: 'ADD_CARD',
       idx,
       cardType: card,
     }));
-
   return gameDeck;
 };
 
-const cardsBoardState = (state = initialState(), action) => {
+const cardList = (state = [], action) => {
   switch (action.type) {
+    case 'START_GAME': {
+      return getGameCards();
+    }
     case 'FLIP_ALL_CARDS': {
       return state.map((card, idx) => cardState(card, { type: 'FLIP_CARD', idxs: [idx] }));
     }
     case 'FLIP_CARD': {
-      return state.map(card => cardState(card, action));
+      return state.map(card => cardState(card, { type: 'FLIP_CARD', idxs: [action.card.idx] }));
     }
-    case 'GUESS_CARD': {
-      return state.map(card => cardState(card, action));
+    case 'COMPARE_CARDS': {
+      const [firstCard, secondCard] = action.pair;
+      const isPair = fromHelpers.checkPair(action.pair);
+
+      return state.map(card =>
+        cardState(card, {
+          type: isPair ? 'GUESS_CARD' : 'FLIP_CARD',
+          idxs: [firstCard.idx, secondCard.idx],
+        }));
     }
     default:
       return state;
   }
 };
 
-export default cardsBoardState;
+const comparePairInitState = {
+  pair: [],
+  needCompare: false,
+};
+
+const comparePair = (state = comparePairInitState, action) => {
+  switch (action.type) {
+    case 'FLIP_CARD':
+      return {
+        pair: [...state.pair, action.card],
+        needCompare: state.pair.length === 1,
+      };
+    case 'START_GAME':
+    case 'COMPARE_CARDS':
+      return comparePairInitState;
+    default:
+      return state;
+  }
+};
+
+export default combineReducers({
+  cardList,
+  comparePair,
+});

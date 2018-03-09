@@ -817,21 +817,21 @@ var flipAllCards = exports.flipAllCards = function flipAllCards() {
 
 var chooseCard = exports.chooseCard = function chooseCard(card) {
   return {
-    type: 'CHOOSE_CARD',
+    type: 'FLIP_CARD',
     card: card
   };
 };
 
-var compareCards = exports.compareCards = function compareCards() {
+var compareCards = exports.compareCards = function compareCards(pair) {
   return {
-    type: 'COMPARE_CARDS'
+    type: 'COMPARE_CARDS',
+    pair: pair
   };
 };
 
-var changeStage = exports.changeStage = function changeStage(stage) {
+var startGame = exports.startGame = function startGame() {
   return {
-    type: 'CHANGE_STAGE',
-    stage: stage
+    type: 'START_GAME'
   };
 };
 
@@ -2004,54 +2004,7 @@ function verifyPlainObject(value, displayName, methodName) {
 }
 
 /***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var cardState = function cardState() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var action = arguments[1];
-
-  switch (action.type) {
-    case 'ADD_CARD':
-      return {
-        idx: action.idx,
-        cardType: action.cardType,
-        flipped: false,
-        guessed: false
-      };
-    case 'FLIP_CARD':
-      {
-        if (action.idxs.includes(state.idx)) {
-          return _extends({}, state, { flipped: !state.flipped });
-        } else {
-          return state;
-        }
-      }
-    case 'GUESS_CARD':
-      {
-        if (action.idxs.includes(state.idx)) {
-          return _extends({}, state, { guessed: true });
-        } else {
-          return state;
-        }
-      }
-    default:
-      return state;
-  }
-};
-
-exports.default = cardState;
-
-/***/ }),
+/* 31 */,
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2072,21 +2025,19 @@ var _App = __webpack_require__(71);
 
 var _App2 = _interopRequireDefault(_App);
 
-var _index = __webpack_require__(78);
+var _reducers = __webpack_require__(78);
+
+var _reducers2 = _interopRequireDefault(_reducers);
+
+var _index = __webpack_require__(82);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(82);
-
-var _index4 = _interopRequireDefault(_index3);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var appState = (0, _redux.combineReducers)({ AppState: _index2.default });
 
 (0, _reactDom.render)(_react2.default.createElement(
   _reactRedux.Provider,
-  { store: (0, _redux.createStore)(appState) },
+  { store: (0, _redux.createStore)(_reducers2.default) },
   _react2.default.createElement(_App2.default, null)
 ), document.getElementById('root'));
 
@@ -21348,8 +21299,7 @@ var App = function (_Component) {
 
 var mapStateToProps = function mapStateToProps(state) {
   return {
-    prop: state.AppState,
-    gameStage: state.AppState.gameStage
+    gameStage: state.gameInfo.stage
   };
 };
 
@@ -21381,7 +21331,7 @@ var _actions = __webpack_require__(13);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var StartWindow = function StartWindow(_ref) {
-  var changeStage = _ref.changeStage;
+  var startGame = _ref.startGame;
   return _react2.default.createElement(
     'div',
     { className: 'start-window' },
@@ -21394,13 +21344,11 @@ var StartWindow = function StartWindow(_ref) {
     _react2.default.createElement(_Button2.default, {
       className: 'button start-window_button',
       text: '\u041D\u0430\u0447\u0430\u0442\u044C \u0438\u0433\u0440\u0443',
-      onButtonClick: function onButtonClick() {
-        return changeStage('game');
-      } })
+      onButtonClick: startGame })
   );
 };
 
-exports.default = (0, _reactRedux.connect)(null, { changeStage: _actions.changeStage })(StartWindow);
+exports.default = (0, _reactRedux.connect)(null, { startGame: _actions.startGame })(StartWindow);
 
 /***/ }),
 /* 73 */
@@ -21429,7 +21377,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var EndWindow = function EndWindow(_ref) {
   var score = _ref.score,
-      changeStage = _ref.changeStage;
+      startGame = _ref.startGame;
   return _react2.default.createElement(
     'div',
     { className: 'end-window' },
@@ -21453,18 +21401,18 @@ var EndWindow = function EndWindow(_ref) {
       className: 'button end-window_button',
       text: '\u0415\u0449\u0435 \u0440\u0430\u0437',
       onButtonClick: function onButtonClick() {
-        return changeStage('game');
+        return startGame('game');
       } })
   );
 };
 
 var mapStateToProps = function mapStateToProps(state) {
   return {
-    score: state.AppState.gameScore
+    score: state.gameInfo.score
   };
 };
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps, { changeStage: _actions.changeStage })(EndWindow);
+exports.default = (0, _reactRedux.connect)(mapStateToProps, { startGame: _actions.startGame })(EndWindow);
 
 /***/ }),
 /* 74 */
@@ -21533,10 +21481,11 @@ var GameWindow = function (_Component) {
     value: function componentDidUpdate() {
       var _props = this.props,
           needCompare = _props.needCompare,
+          pair = _props.pair,
           compareCards = _props.compareCards;
 
       setTimeout(function () {
-        if (needCompare) compareCards();
+        needCompare && compareCards(pair);
       }, 600);
     }
   }, {
@@ -21546,7 +21495,7 @@ var GameWindow = function (_Component) {
         clearTimeout(this.timerID);
       }
 
-      this.props.changeStage('game');
+      this.props.startGame();
       this.timerID = setTimeout(this.props.flipAllCards, FLIP_DELAY);
     }
   }, {
@@ -21579,11 +21528,11 @@ var GameWindow = function (_Component) {
 
 var mapStateToProps = function mapStateToProps(state) {
   return {
-    cards: state.AppState.cards,
-    compareCardList: state.AppState.compareCardsPair,
-    needCompare: state.AppState.needCompare,
-    gameStage: state.AppState.gameStage,
-    score: state.AppState.gameScore
+    p: state,
+    cards: state.cardBoard.cardList,
+    pair: state.cardBoard.comparePair.pair,
+    needCompare: state.cardBoard.comparePair.needCompare,
+    score: state.gameInfo.score
   };
 };
 
@@ -21591,7 +21540,7 @@ var actions = {
   flipAllCards: _actions.flipAllCards,
   chooseCard: _actions.chooseCard,
   compareCards: _actions.compareCards,
-  changeStage: _actions.changeStage
+  startGame: _actions.startGame
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, actions)(GameWindow);
@@ -21668,7 +21617,6 @@ var CardBoard = function (_React$Component) {
     value: function render() {
       var _props = this.props,
           cards = _props.cards,
-          chooseCard = _props.chooseCard,
           needCompare = _props.needCompare,
           _onCardClick = _props.onCardClick;
 
@@ -21758,129 +21706,43 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _redux = __webpack_require__(20);
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+var _cardBoard = __webpack_require__(91);
 
-var _CardBoard = __webpack_require__(79);
+var _cardBoard2 = _interopRequireDefault(_cardBoard);
 
-var fromCardBoard = _interopRequireWildcard(_CardBoard);
+var _gameInfo = __webpack_require__(90);
 
-var _Card = __webpack_require__(31);
-
-var _Card2 = _interopRequireDefault(_Card);
-
-var _GameScore = __webpack_require__(81);
-
-var _GameScore2 = _interopRequireDefault(_GameScore);
+var _gameInfo2 = _interopRequireDefault(_gameInfo);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var rootState = (0, _redux.combineReducers)({
+  cardBoard: _cardBoard2.default,
+  gameInfo: _gameInfo2.default
+});
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var initialState = {
-  cards: [],
-  compareCardsPair: [],
-  needCompare: false,
-  gameScore: _GameScore2.default,
-  unOpenPair: 9,
-  gameStage: 'start'
-};
-
-var checkPair = function checkPair(cardPair) {
-  var _cardPair = _slicedToArray(cardPair, 2),
-      firstCard = _cardPair[0],
-      secondCard = _cardPair[1];
-
-  return firstCard.cardType === secondCard.cardType;
-};
-
-var checkEndGame = function checkEndGame(countUnopenedCard) {
-  return countUnopenedCard === 0;
-};
-
-var appState = function appState() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-  var action = arguments[1];
-
-  switch (action.type) {
-    case 'FLIP_ALL_CARDS':
-      {
-        return _extends({}, state, {
-          cards: (0, fromCardBoard.default)(state.cards, action)
-        });
-      }
-    case 'CHOOSE_CARD':
-      {
-        var compareCardsPair = state.compareCardsPair.slice('');
-
-        return Object.assign({}, state, {
-          cards: (0, fromCardBoard.default)(state.cards, { type: 'FLIP_CARD', idxs: [action.card.idx] }),
-          compareCardsPair: [].concat(_toConsumableArray(compareCardsPair), [action.card]),
-          needCompare: compareCardsPair.length === 1
-        });
-      }
-    case 'COMPARE_CARDS':
-      {
-        var isPair = checkPair(state.compareCardsPair);
-
-        var _state$compareCardsPa = _slicedToArray(state.compareCardsPair, 2),
-            firstCard = _state$compareCardsPa[0],
-            secondCard = _state$compareCardsPa[1];
-
-        var newState = {
-          needCompare: false,
-          compareCardsPair: []
-        };
-
-        if (isPair) {
-          var unOpenPair = state.unOpenPair - 1;
-          var isEnd = checkEndGame(unOpenPair);
-
-          if (isEnd) {
-            newState.cards = [];
-            newState.gameStage = 'end';
-          } else {
-            newState.gameScore = (0, _GameScore2.default)(state.gameScore, (0, _GameScore.INC_SCORE)(unOpenPair * 42));
-            newState.unOpenPair = unOpenPair;
-            newState.cards = (0, fromCardBoard.default)(state.cards, { type: 'GUESS_CARD', idxs: [firstCard.idx, secondCard.idx] });
-          }
-        } else {
-          var openPair = 9 - state.unOpenPair;
-          newState.gameScore = (0, _GameScore2.default)(state.gameScore, (0, _GameScore.DEC_SCORE)(openPair * 42));
-          newState.cards = (0, fromCardBoard.default)(state.cards, { type: 'FLIP_CARD', idxs: [firstCard.idx, secondCard.idx] });
-        }
-        return Object.assign({}, state, newState);
-      }
-    case 'CHANGE_STAGE':
-      switch (action.stage) {
-        case 'start':
-          return initialState;
-        case 'game':
-          return Object.assign({}, {
-            cards: (0, fromCardBoard.default)(undefined, { type: 'INIT' }),
-            gameStage: 'game',
-            compareCardsPair: [],
-            needCompare: false,
-            gameScore: 0,
-            unOpenPair: 9
-          });
-        case 'end':
-          return Object.assign({}, state);
-        default:
-          return state;
-      }
-    default:
-      return state;
-  }
-};
-
-exports.default = appState;
+exports.default = rootState;
 
 /***/ }),
-/* 79 */
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 83 */,
+/* 84 */,
+/* 85 */,
+/* 86 */,
+/* 87 */,
+/* 88 */,
+/* 89 */,
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21890,89 +21752,192 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Card = __webpack_require__(31);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _Card2 = _interopRequireDefault(_Card);
+var _helpers = __webpack_require__(92);
 
-var _utils = __webpack_require__(80);
+var fromHelpers = _interopRequireWildcard(_helpers);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var decScore = function decScore(state) {
+  return state.score - (9 - state.unOpenPairs) * 42;
+};
+
+var incScore = function incScore(state) {
+  return state.score + state.unOpenPairs * 42;
+};
+
+var getGameStage = function getGameStage(state) {
+  return state.unOpenPairs - 1 ? 'game' : 'end';
+};
+
+var initialState = {
+  stage: 'start',
+  score: 0,
+  unOpenPairs: 9
+};
+
+var gameInfo = function gameInfo() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments[1];
+
+  switch (action.type) {
+    case 'START_GAME':
+      {
+        return _extends({}, initialState, {
+          stage: 'game'
+        });
+      }
+    case 'COMPARE_CARDS':
+      {
+        var isPair = fromHelpers.checkPair(action.pair);
+        if (isPair) {
+          return _extends({}, state, {
+            score: incScore(state),
+            stage: getGameStage(state),
+            unOpenPairs: state.unOpenPairs - 1
+          });
+        } else {
+          return _extends({}, state, {
+            score: decScore(state)
+          });
+        }
+      }
+    default:
+      return state;
+  }
+};
+
+exports.default = gameInfo;
+
+/***/ }),
+/* 91 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _redux = __webpack_require__(20);
+
+var _card = __webpack_require__(93);
+
+var _card2 = _interopRequireDefault(_card);
+
+var _helpers = __webpack_require__(92);
+
+var fromHelpers = _interopRequireWildcard(_helpers);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var getGameCards = function getGameCards() {
+  var gameDeck = fromHelpers.createGameDeck().map(function (card, idx) {
+    return (0, _card2.default)(undefined, {
+      type: 'ADD_CARD',
+      idx: idx,
+      cardType: card
+    });
+  });
+  return gameDeck;
+};
+
+var cardList = function cardList() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var action = arguments[1];
+
+  switch (action.type) {
+    case 'START_GAME':
+      {
+        return getGameCards();
+      }
+    case 'FLIP_ALL_CARDS':
+      {
+        return state.map(function (card, idx) {
+          return (0, _card2.default)(card, { type: 'FLIP_CARD', idxs: [idx] });
+        });
+      }
+    case 'FLIP_CARD':
+      {
+        return state.map(function (card) {
+          return (0, _card2.default)(card, { type: 'FLIP_CARD', idxs: [action.card.idx] });
+        });
+      }
+    case 'COMPARE_CARDS':
+      {
+        var _action$pair = _slicedToArray(action.pair, 2),
+            firstCard = _action$pair[0],
+            secondCard = _action$pair[1];
+
+        var isPair = fromHelpers.checkPair(action.pair);
+
+        return state.map(function (card) {
+          return (0, _card2.default)(card, {
+            type: isPair ? 'GUESS_CARD' : 'FLIP_CARD',
+            idxs: [firstCard.idx, secondCard.idx]
+          });
+        });
+      }
+    default:
+      return state;
+  }
+};
+
+var comparePairInitState = {
+  pair: [],
+  needCompare: false
+};
+
+var comparePair = function comparePair() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : comparePairInitState;
+  var action = arguments[1];
+
+  switch (action.type) {
+    case 'FLIP_CARD':
+      return {
+        pair: [].concat(_toConsumableArray(state.pair), [action.card]),
+        needCompare: state.pair.length === 1
+      };
+    case 'START_GAME':
+    case 'COMPARE_CARDS':
+      return comparePairInitState;
+    default:
+      return state;
+  }
+};
+
+exports.default = (0, _redux.combineReducers)({
+  cardList: cardList,
+  comparePair: comparePair
+});
+
+/***/ }),
+/* 92 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var CARD_SUITS = ['D', 'H', 'S', 'C'];
 var CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 0, 'J', 'Q', 'K', 'A'];
 
-var createCardDeck = function createCardDeck(cardSuits, cardValues) {
-  return cardSuits.reduce(function (deck, suit) {
-    return [].concat(_toConsumableArray(deck), _toConsumableArray(cardValues.map(function (cardValue) {
-      return '' + cardValue + suit;
-    })));
-  }, []);
-};
-
-var createGameDeck = function createGameDeck(cardDeck) {
-  var nineUniqueIndexes = (0, _utils.getNineRandomNumbers)(cardDeck.length);
-  var cards = nineUniqueIndexes.map(function (idx) {
-    return cardDeck[idx];
-  });
-
-  return (0, _utils.shuffleArray)([].concat(_toConsumableArray(cards), _toConsumableArray(cards)));
-};
-
-var initialState = function initialState() {
-  var deck = createCardDeck(CARD_SUITS, CARD_VALUES); // 52 cards
-  var gameDeck = createGameDeck(deck).map(function (card, idx) {
-    return (0, _Card2.default)(undefined, {
-      type: 'ADD_CARD',
-      idx: idx,
-      cardType: card
-    });
-  });
-
-  return gameDeck;
-};
-
-var cardsBoardState = function cardsBoardState() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState();
-  var action = arguments[1];
-
-  switch (action.type) {
-    case 'FLIP_ALL_CARDS':
-      {
-        return state.map(function (card, idx) {
-          return (0, _Card2.default)(card, { type: 'FLIP_CARD', idxs: [idx] });
-        });
-      }
-    case 'FLIP_CARD':
-      {
-        return state.map(function (card) {
-          return (0, _Card2.default)(card, action);
-        });
-      }
-    case 'GUESS_CARD':
-      {
-        return state.map(function (card) {
-          return (0, _Card2.default)(card, action);
-        });
-      }
-    default:
-      return state;
-  }
-};
-
-exports.default = cardsBoardState;
-
-/***/ }),
-/* 80 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 var getRandom = function getRandom(maxValue) {
   return Math.floor(Math.random() * maxValue);
 };
@@ -22006,11 +21971,37 @@ var shuffleArray = function shuffleArray(array) {
   return newArray;
 };
 
-exports.getNineRandomNumbers = getNineRandomNumbers;
-exports.shuffleArray = shuffleArray;
+var checkPair = function checkPair(cardPair) {
+  var _cardPair = _slicedToArray(cardPair, 2),
+      firstCard = _cardPair[0],
+      secondCard = _cardPair[1];
+
+  return firstCard.cardType === secondCard.cardType;
+};
+
+var createCardDeck = function createCardDeck(cardSuits, cardValues) {
+  return cardSuits.reduce(function (deck, suit) {
+    return [].concat(_toConsumableArray(deck), _toConsumableArray(cardValues.map(function (cardValue) {
+      return '' + cardValue + suit;
+    })));
+  }, []);
+};
+
+var createGameDeck = function createGameDeck() {
+  var cardDeck = createCardDeck(CARD_SUITS, CARD_VALUES);
+  var nineUniqueIndexes = getNineRandomNumbers(cardDeck.length);
+  var cards = nineUniqueIndexes.map(function (idx) {
+    return cardDeck[idx];
+  });
+
+  return shuffleArray([].concat(_toConsumableArray(cards), _toConsumableArray(cards)));
+};
+
+exports.createGameDeck = createGameDeck;
+exports.checkPair = checkPair;
 
 /***/ }),
-/* 81 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22019,51 +22010,43 @@ exports.shuffleArray = shuffleArray;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var gameScoreState = function gameScoreState() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var cardState = function cardState() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var action = arguments[1];
 
-  var newScore = void 0;
   switch (action.type) {
-    case 'INC_SCORE':
-      newScore = state + action.score;
-      return newScore;
-    case 'DEC_SCORE':
-      newScore = state - action.score;
-      return newScore;
-    case 'RESET_SCORE':
-      return 0;
+    case 'ADD_CARD':
+      return {
+        idx: action.idx,
+        cardType: action.cardType,
+        flipped: false,
+        guessed: false
+      };
+    case 'FLIP_CARD':
+      {
+        if (action.idxs.includes(state.idx)) {
+          return _extends({}, state, { flipped: !state.flipped });
+        } else {
+          return state;
+        }
+      }
+    case 'GUESS_CARD':
+      {
+        if (action.idxs.includes(state.idx)) {
+          return _extends({}, state, { guessed: true });
+        } else {
+          return state;
+        }
+      }
     default:
       return state;
   }
 };
 
-exports.default = gameScoreState;
-var INC_SCORE = exports.INC_SCORE = function INC_SCORE(score) {
-  return {
-    type: 'INC_SCORE',
-    score: score
-  };
-};
-
-var DEC_SCORE = exports.DEC_SCORE = function DEC_SCORE(score) {
-  return {
-    type: 'DEC_SCORE',
-    score: score
-  };
-};
-
-var RESET_SCORE = exports.RESET_SCORE = function RESET_SCORE() {
-  return {
-    type: 'RESET_SCORE'
-  };
-};
-
-/***/ }),
-/* 82 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
+exports.default = cardState;
 
 /***/ })
 /******/ ]);

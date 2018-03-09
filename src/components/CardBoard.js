@@ -5,7 +5,6 @@ class CardBoard extends React.Component {
   render() {
     const {
       cards,
-      chooseCard,
       needCompare,
       onCardClick
     } = this.props;

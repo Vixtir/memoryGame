@@ -27,10 +27,8 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = state =>
-  ({
-    prop: state.AppState,
-    gameStage: state.AppState.gameStage,
-  });
+const mapStateToProps = state => ({
+  gameStage: state.gameInfo.stage,
+});
 
 export default connect(mapStateToProps)(App);
