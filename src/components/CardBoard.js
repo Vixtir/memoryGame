@@ -1,27 +1,13 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import Card from './Card';
 
 class CardBoard extends React.Component {
-  componentDidMount() {
-    setTimeout(this.props.flipAllCards, 5000);
-  }
-
-  componentDidUpdate() {
-    const {
-      needCompare,
-      compareCards
-    } = this.props;
-    setTimeout(() => {
-      if (needCompare) compareCards();
-    }, 600);
-  }
-
   render() {
     const {
       cards,
       chooseCard,
-      needCompare
+      needCompare,
+      onCardClick
     } = this.props;
 
     return (<div className='card-board'>
@@ -29,10 +15,11 @@ class CardBoard extends React.Component {
           <Card
             key={card.idx}
             card={card.cardType}
-            flip={card.flip}
+            flipped={card.flipped}
+            guessed={card.guessed}
             onCardClick={() => {
-                if (card.flip && !needCompare) {
-                  chooseCard(card);
+                if (card.flipped && !needCompare) {
+                  onCardClick(card);
                 }
               }
             }
@@ -42,18 +29,4 @@ class CardBoard extends React.Component {
   }
 }
 
-const mapStateToProps = state =>
-  ({
-    cards: state.gameDeck.cards,
-    compareCardList: state.gameDeck.compareCards,
-    needCompare: state.gameDeck.needCompare,
-  });
-
-const mapDispatchToProps = dispatch =>
-  ({
-    flipAllCards: () => dispatch({ type: 'FLIP_ALL_CARDS' }),
-    chooseCard: card => dispatch({ type: 'CHOOSE_CARD', card }),
-    compareCards: () => dispatch({ type: 'COMPARE_CARDS' }),
-  });
-
-export default connect(mapStateToProps, mapDispatchToProps)(CardBoard);
+export default CardBoard;

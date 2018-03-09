@@ -1,19 +1,17 @@
 import cardState from '../reducers/Card';
-
 import { getNineRandomNumbers, shuffleArray } from '../utils/utils';
 
 const CARD_SUITS = ['D', 'H', 'S', 'C'];
 const CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 0, 'J', 'Q', 'K', 'A'];
 
-const createCardDeck = (cardSuits, cardValues) => {
-  const result = cardSuits.reduce((deck, suit) => {
-    return [
-      ...deck,
-      ...cardValues.map(cardValue => `${cardValue}${suit}`)];
-  }, []);
-
-  return result;
-};
+const createCardDeck = (cardSuits, cardValues) =>
+  cardSuits.reduce(
+    (deck, suit) =>
+      [
+        ...deck,
+        ...cardValues.map(cardValue => `${cardValue}${suit}`)]
+    , [],
+  );
 
 const createGameDeck = (cardDeck) => {
   const nineUniqueIndexes = getNineRandomNumbers(cardDeck.length);
@@ -31,64 +29,19 @@ const initialState = () => {
       cardType: card,
     }));
 
-  return {
-    cards: gameDeck,
-    activeCard: '',
-    compareCards: [],
-    needCompare: false,
-  };
+  return gameDeck;
 };
 
 const cardsBoardState = (state = initialState(), action) => {
   switch (action.type) {
-    case 'ADD_CARD':
-      return Object.assign({}, state, {
-        cards: [
-          ...state,
-          cardState(undefined, action),
-        ],
-      });
     case 'FLIP_ALL_CARDS': {
-      return Object.assign({}, state, {
-        cards: state.cards.map((card, idx) => cardState(card, { type: 'FLIP_CARD', idxs: [idx] })),
-      });
+      return state.map((card, idx) => cardState(card, { type: 'FLIP_CARD', idxs: [idx] }));
     }
     case 'FLIP_CARD': {
-      return Object.assign({}, state, {
-        cards: state.cards.map((card) => cardState(card, { type: 'FLIP_CARD', idxs: action.idxs })),
-      });
+      return state.map(card => cardState(card, action));
     }
-    case 'COMPARE_CARDS': {
-      const [firstCard, secondCard] = state.compareCards;
-      if (firstCard.cardType === secondCard.cardType) {
-        // подсчет очков, проверка окончания игры
-        return Object.assign({}, state, { needCompare: false, compareCards: [] });
-      } else {
-        return Object.assign(
-          {}, 
-          state, 
-          { 
-            cards: state.cards.map(card =>
-              cardState(card, { type: 'FLIP_CARD', idxs: [firstCard.idx, secondCard.idx]})),
-            compareCards: [],
-            needCompare: false
-          }
-        )
-      }
-    }
-    case 'CHOOSE_CARD': {
-      const flippedCards = state.cards.map(card => cardState(card, { type: 'FLIP_CARD', idxs: [action.card.idx] }));
-      const compareCards = state.compareCards.splice('');
-
-      return Object.assign(
-        {},
-        state,
-        {
-          cards: flippedCards,
-          compareCards: [...compareCards, action.card],
-          needCompare: compareCards.length === 1,
-        },
-      );
+    case 'GUESS_CARD': {
+      return state.map(card => cardState(card, action));
     }
     default:
       return state;

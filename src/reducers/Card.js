@@ -4,11 +4,19 @@ const cardState = (state = {}, action) => {
       return {
         idx: action.idx,
         cardType: action.cardType,
-        flip: false,
+        flipped: false,
+        guessed: false,
       };
     case 'FLIP_CARD': {
-      if (action.idxs.indexOf(state.idx) !== -1) {
-        return Object.assign({}, state, { flip: !state.flip });
+      if (action.idxs.includes(state.idx)) {
+        return { ...state, flipped: !state.flipped };
+      } else {
+        return state;
+      }
+    }
+    case 'GUESS_CARD': {
+      if (action.idxs.includes(state.idx)) {
+        return { ...state, guessed: true };
       } else {
         return state;
       }

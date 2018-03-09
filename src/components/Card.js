@@ -1,7 +1,12 @@
 import React from 'react';
 
-const Card = ({ card, onCardClick, flip }) => {
-  const cN = `card ${flip ? 'flip' : ''}`;
+const Card = ({ 
+  card, 
+  onCardClick, 
+  flipped,
+  guessed
+}) => {
+  const cN = `card ${flipped ? 'flipped' : ''} ${guessed ? 'guessed' : ''}`;
   return (
     <div
       className={cN}
@@ -13,7 +18,7 @@ const Card = ({ card, onCardClick, flip }) => {
       </div>
 
       <div className='card-back'>
-        <img className='card-back-image' src={'./images/cards/back.png'} alt='card-back' />
+        <img className='card-back-image' src={'./images/cards/cat.jpg'} alt='card-back' />
       </div>
     </div>
   </div>

@@ -1,26 +1,27 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import CardBoard from '../components/CardBoard';
-import StartWindow from '../components/StartWindow';
+import StartWindow from './StartWindow';
+import EndWindow from './EndWindow';
+import GameWindow from './GameWindow';
 
 class App extends Component {
   render() {
-    let x;
+    let component;
 
     switch (this.props.gameStage) {
-      case 'start':
-        x = <StartWindow />;
-        break;
       case 'game':
-        x = <CardBoard />;
+        component = <GameWindow />;
+        break;
+      case 'end':
+        component = <EndWindow />;
         break;
       default:
-        x = <div>123</div>;
+        component = <StartWindow />;
     }
 
     return (
       <div className='app'>
-        { x }
+        { component }
       </div>
     );
   }
@@ -28,7 +29,8 @@ class App extends Component {
 
 const mapStateToProps = state =>
   ({
-    gameStage: state.gameStage,
+    prop: state.AppState,
+    gameStage: state.AppState.gameStage,
   });
 
 export default connect(mapStateToProps)(App);
