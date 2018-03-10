@@ -3,9 +3,10 @@ import { connect } from 'react-redux';
 import GameScore from '../components/GameScore';
 import CardBoard from '../components/CardBoard';
 import Button from '../components/Button';
+import { getCards } from '../reducers/cardBoard';
 import {
   flipAllCards,
-  chooseCard,
+  flipCard,
   compareCards,
   startGame,
 } from '../actions';
@@ -22,6 +23,7 @@ class GameWindow extends Component {
   }
 
   componentDidUpdate() {
+    console.log(this.props);
     const {
       needCompare,
       pair,
@@ -42,18 +44,25 @@ class GameWindow extends Component {
   }
 
   render() {
+    const {
+      score,
+      cards,
+      flipCard,
+      needCompare
+    } = this.props;
     return (
       <div className='game-window'>
         <Button
+          dataTid="NewGame-startGame"
           className="game-window_reset-btn"
           text="Начать заного"
           onButtonClick={() => this.handleResetButtonClick()}/>
         <GameScore
-          score = {this.props.score}/>
+          score = {score}/>
         <CardBoard
-          cards={this.props.cards}
-          onCardClick = {this.props.chooseCard}
-          needCompare = {this.props.needCompare}
+          cards={cards}
+          onCardClick = {flipCard}
+          needCompare = {needCompare}
         />
       </div>
     );
@@ -62,8 +71,7 @@ class GameWindow extends Component {
 
 const mapStateToProps = state =>
   ({
-    p: state,
-    cards: state.cardBoard.cardList,
+    cards: getCards(state.cardBoard),
     pair: state.cardBoard.comparePair.pair,
     needCompare: state.cardBoard.comparePair.needCompare,
     score: state.gameInfo.score,
@@ -71,7 +79,7 @@ const mapStateToProps = state =>
 
 const actions = {
   flipAllCards,
-  chooseCard,
+  flipCard,
   compareCards,
   startGame,
 };

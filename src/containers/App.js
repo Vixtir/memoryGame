@@ -20,7 +20,7 @@ class App extends Component {
     }
 
     return (
-      <div className='app'>
+      <div className='app' data-tid='App'>
         { component }
       </div>
     );

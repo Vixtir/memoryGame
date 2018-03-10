@@ -9,10 +9,10 @@ class CardBoard extends React.Component {
       onCardClick
     } = this.props;
 
-    return (<div className='card-board'>
+    return (<div className='card-board' data-tid="Deck">
       { cards.map(card =>
           <Card
-            key={card.idx}
+            key={card.id}
             card={card.cardType}
             flipped={card.flipped}
             guessed={card.guessed}
