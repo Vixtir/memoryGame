@@ -63,8 +63,8 @@ describe('gameInfo reducer', () => {
             };
 
             it('score increased ', () => {
-              // score: (5 * 42) + 500
-              const expectedStateScore = 710;
+              // score: ((5-1) * 42) + 500;
+              const expectedStateScore = 668;
               expect(reducer(state, compareCards(pair)).score)
                 .toEqual(expectedStateScore);
             });

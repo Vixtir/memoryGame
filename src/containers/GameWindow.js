@@ -23,7 +23,6 @@ class GameWindow extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.props);
     const {
       needCompare,
       pair,
