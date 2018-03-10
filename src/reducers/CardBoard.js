@@ -1,37 +1,52 @@
 import { combineReducers } from 'redux';
-import cardState from '../reducers/card';
+import cardState from './card';
 import * as fromHelpers from '../helpers';
+import { addCard, flipCard, guessCard } from '../actions';
 
-const getGameCards = () => {
-  const gameDeck = fromHelpers.createGameDeck().map((card, idx) =>
-    cardState(undefined, {
-      type: 'ADD_CARD',
-      idx,
-      cardType: card,
-    }));
-  return gameDeck;
+const getGameCards = () =>
+  fromHelpers.createGameDeck().reduce((obj, cardType, id) => {
+    obj[id] = cardState(undefined, addCard(id, cardType));
+    return obj;
+  }, {});
+
+const cardIds = (state = [], action) => {
+  switch (action.type) {
+    case 'START_GAME': {
+      return [...Array(18).keys()];
+    }
+    default:
+      return state;
+  }
 };
 
-const cardList = (state = [], action) => {
+const byId = (state = {}, action) => {
   switch (action.type) {
     case 'START_GAME': {
       return getGameCards();
     }
     case 'FLIP_ALL_CARDS': {
-      return state.map((card, idx) => cardState(card, { type: 'FLIP_CARD', idxs: [idx] }));
+      const ids = Object.keys(state);
+      return ids.reduce((obj, id) => {
+        obj[id] = { ...state[id], flipped: true };
+        return obj;
+      }, {});
     }
     case 'FLIP_CARD': {
-      return state.map(card => cardState(card, { type: 'FLIP_CARD', idxs: [action.card.idx] }));
+      const cardId = action.card.id;
+      return {
+        ...state,
+        [cardId]: cardState(state[cardId], action),
+      };
     }
     case 'COMPARE_CARDS': {
       const [firstCard, secondCard] = action.pair;
       const isPair = fromHelpers.checkPair(action.pair);
-
-      return state.map(card =>
-        cardState(card, {
-          type: isPair ? 'GUESS_CARD' : 'FLIP_CARD',
-          idxs: [firstCard.idx, secondCard.idx],
-        }));
+      const cardAction = isPair ? guessCard : flipCard;
+      return {
+        ...state,
+        [firstCard.id]: cardState(state[firstCard.id], cardAction(firstCard.id)),
+        [secondCard.id]: cardState(state[secondCard.id], cardAction(secondCard.id)),
+      };
     }
     default:
       return state;
@@ -58,7 +73,17 @@ const comparePair = (state = comparePairInitState, action) => {
   }
 };
 
+export const getCard = (state, id) =>
+  state.byId[id];
+
+export const getCards = state =>
+  state.cardIds.map(id => getCard(state, id));
+
+export const getPair = state =>
+  state.comparePair.pair;
+
 export default combineReducers({
-  cardList,
+  cardIds,
+  byId,
   comparePair,
 });

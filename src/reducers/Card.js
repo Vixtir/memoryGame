@@ -1,25 +1,24 @@
-const cardState = (state = {}, action) => {
+export const initialState = {
+  id: undefined,
+  cardType: undefined,
+  flipped: false,
+  guessed: false,
+};
+
+const cardState = (state = initialState, action) => {
   switch (action.type) {
     case 'ADD_CARD':
       return {
-        idx: action.idx,
+        id: action.id,
         cardType: action.cardType,
         flipped: false,
         guessed: false,
       };
     case 'FLIP_CARD': {
-      if (action.idxs.includes(state.idx)) {
-        return { ...state, flipped: !state.flipped };
-      } else {
-        return state;
-      }
+      return { ...state, flipped: !state.flipped };
     }
     case 'GUESS_CARD': {
-      if (action.idxs.includes(state.idx)) {
-        return { ...state, guessed: true };
-      } else {
-        return state;
-      }
+      return { ...state, guessed: !state.guessed };
     }
     default:
       return state;

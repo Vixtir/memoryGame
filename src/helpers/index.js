@@ -1,5 +1,4 @@
-const CARD_SUITS = ['D', 'H', 'S', 'C'];
-const CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 0, 'J', 'Q', 'K', 'A'];
+import * as cardsConstants from '../constants/cards';
 
 const getRandom = maxValue =>
   Math.floor(Math.random() * maxValue);
@@ -46,7 +45,7 @@ const createCardDeck = (cardSuits, cardValues) =>
   );
 
 const createGameDeck = () => {
-  const cardDeck = createCardDeck(CARD_SUITS, CARD_VALUES);
+  const cardDeck = createCardDeck(cardsConstants.SUITS, cardsConstants.VALUES);
   const nineUniqueIndexes = getNineRandomNumbers(cardDeck.length);
   const cards = nineUniqueIndexes.map(idx => cardDeck[idx]);
 

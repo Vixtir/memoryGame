@@ -14,6 +14,7 @@ const EndWindow = ({
       <p>Ваш итоговый счет: { score }</p>
     </span>
     <Button
+      dataTid="EndGame-retryGame"
       className='button end-window_button'
       text='Еще раз'
       onButtonClick={() => startGame('game')}/>

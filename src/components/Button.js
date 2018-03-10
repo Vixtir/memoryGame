@@ -3,9 +3,12 @@ import React from 'react';
 const Button = ({
   onButtonClick,
   text,
-  className
+  className,
+  dataTid
 }) => (
-  <button className={className}
+  <button
+    className={className}
+    data-tid={dataTid}
     onClick={ (event) => {
         event.preventDefault();
         onButtonClick();

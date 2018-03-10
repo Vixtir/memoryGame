@@ -1,16 +1,16 @@
 import * as fromHelpers from '../helpers';
 
-const decScore = state =>
+export const decScore = state =>
   state.score - ((9 - state.unOpenPairs) * 42);
 
-const incScore = state =>
+export const incScore = state =>
   state.score + (state.unOpenPairs * 42);
 
-const getGameStage = (state) => {
+export const getGameStage = (state) => {
   return state.unOpenPairs - 1 ? 'game' : 'end';
 };
 
-const initialState = {
+export const initialState = {
   stage: 'start',
   score: 0,
   unOpenPairs: 9,

@@ -12,6 +12,7 @@ const StartWindow = ({
       MEMORY GAME
     </p>
     <Button
+      dataTid="NewGame-startGame"
       className='button start-window_button'
       text="Начать игру"
       onButtonClick={startGame}/>
