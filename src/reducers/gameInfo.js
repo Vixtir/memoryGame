@@ -4,7 +4,7 @@ export const decScore = state =>
   state.score - ((9 - state.unOpenPairs) * 42);
 
 export const incScore = state =>
-  state.score + ((state.unOpenPairs - 1) * 42);
+  state.score + (state.unOpenPairs * 42);
 
 export const getGameStage = (state) => {
   return state.unOpenPairs - 1 ? 'game' : 'end';
