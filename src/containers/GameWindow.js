@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import GameScore from '../components/GameScore';
 import CardBoard from '../components/CardBoard';
 import Button from '../components/Button';
-import { getCards } from '../reducers/cardBoard.js';
+import { getCards } from '../reducers/cardBoard';
 import {
   flipAllCards,
   flipCard,
