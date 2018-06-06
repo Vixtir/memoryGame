@@ -1,9 +1,16 @@
 .start-window
-  width 960px
+  width 100%
+  max-width 960px
+  min-width 320px
+  padding 0 16px
   display: flex
   flex-flow: column wrap
   align-items: center
   align-content: center
+
+.start-window_image
+  width 100%
+  max-width 320px
 
 .start-window_title
   color: rgba(255,255,255, .85)
@@ -11,4 +18,8 @@
 
 .start-window_button
   margin: 10px 20px
+
+@media screen and (min-width: 600px)
+  .start-window_image
+    max-width 500px
   

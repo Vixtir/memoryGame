@@ -7,7 +7,7 @@ const StartWindow = ({
   startGame
 }) => (
   <div className='start-window'>
-    <img src='/images/StartGame.png'/>
+    <img src='/images/StartGame.png' className='start-window_image'/>
     <p className='start-window_title'>
       MEMORY GAME
     </p>
