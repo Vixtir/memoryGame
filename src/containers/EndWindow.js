@@ -8,7 +8,7 @@ const EndWindow = ({
   startGame
 }) => (
   <div className='end-window'>
-    <img src='/images/EndGame.png'/>
+    <img src='/images/EndGame.png' className='end-window_image'/>
     <span className='end-window_title'>
       <p>Поздравляем</p>
       <p>Ваш итоговый счет: { score }</p>
