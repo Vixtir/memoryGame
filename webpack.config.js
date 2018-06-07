@@ -3,7 +3,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const config = {
   entry: {
-    app: './src/index.js',
+    app: ['babel-polyfill', './src/index.js'],
   },
   output: {
     path: path.resolve(__dirname, 'public/dist'),
