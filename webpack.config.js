@@ -9,7 +9,7 @@ const config = {
     path: path.resolve(__dirname, 'public/dist'),
     filename: 'app.bundle.js',
   },
-  watch: false,
+  watch: true,
   module: {
     rules: [
       {
